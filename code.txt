@@ -1,0 +1,131 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+public class Utilitaire {
+
+    private String filePath="/home/rpi244/IdeaProjects/RO/src/graphe.txt";
+    public Utilitaire(){
+        lireGrapheInFile();
+    }
+    public void lireGrapheInFile(){
+        try  {
+            BufferedReader lecteur = new BufferedReader(new FileReader(filePath));
+            String line="";
+            String valeurLecture="";
+            int i=0;
+            int sommet = 0;
+            int arcs=0;
+            int matrice[][]=null;
+            int ligne=0;
+            int colonne=0;
+            int valeur=0;
+            int espace=0;/*Pour pouvoir savoir si jai trouver un espace de la cosntruction ou pas dans la ligne des sommet et valeur*/
+            while((line=lecteur.readLine())!=null){
+                //System.out.println(line);
+                if(i==0) {
+                    valeurLecture=lireDansChaine(line);
+                     sommet=Integer.parseInt(valeurLecture);
+                     matrice=remplirMatriceDeZero(sommet);
+
+                }else{
+                    if(i==1){
+                        valeurLecture=lireDansChaine(line);
+                        arcs=Integer.parseInt(valeurLecture);
+
+                    }else{
+                        espace=0;
+                        String construction="";
+                        for (int indice = 0; indice < line.length(); indice++) {
+
+                            if(line.charAt(indice)!=' '){
+                                if(line.charAt(indice)>='0' && line.charAt(indice)<='9' || line.charAt(indice)=='-'){
+                                    construction+=line.charAt(indice);
+                                }else{
+                                    /*Quand une valeur dans le fichier n'est pas espace ni un entier*/
+                                    System.err.println("Les valeurs dans le fichier doit être des entiers!");
+                                    break;
+                                }
+
+                            }else{
+                                switch (espace){
+                                    case 0:
+                                        /*signifie qu cest la valeur dun sommet initiale*/
+                                        espace+=1;
+                                        ligne=Integer.parseInt(construction)-1;
+                                        System.out.println(ligne+" ligne");
+                                        construction="";
+
+                                        break;
+                                    case 1: /*Cela signifie que cest la valeur d'un sommet terminal*/
+                                        espace+=1;
+                                        colonne=Integer.parseInt(construction)-1;
+                                        construction="";
+                                        System.out.println(colonne+" colonne");
+                                        break;
+                                    case 2: /*Cela signifie que cest le poids de larcs*/
+                                        espace+=1;
+                                        valeur=Integer.parseInt(construction);
+                                        System.out.println(valeur+" valeur");
+                                        construction="";
+                                        break;
+
+                                }
+                            }
+                        }
+                        matrice[ligne][colonne]=valeur;
+                    }
+                }
+                i+=1;
+            }
+            //Lancement du programme
+            Graphe g =new Graphe(matrice.length,arcs,matrice);
+            System.out.println("*****************************************************************************************\n " +
+                    "après la construction du graphe");
+            System.out.println(g.toString());
+            //recherche du plus court chemin en passant le sommet initial s comme parametre
+            int s=1;
+            g.plusCourtChemin_s(s,g.getMatriceAdjacence());
+
+
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    public String lireDansChaine(String chaine){
+        String valeurLecture="";
+        for (int indice = 0; indice <chaine.length() ; indice++) {
+            if(chaine.charAt(indice)>='0' && chaine.charAt(indice)<='9'){
+                valeurLecture+=chaine.charAt(indice);
+            }
+
+        }
+        return valeurLecture;
+    }
+
+    //fonction qui verifie si la lecture dans le fichier
+    private boolean verifierLine(String chaine){
+        //parcourir la ligne aussi
+        for (int i = 0; i <chaine.length() ; i++) {
+            if(chaine.charAt(i)!= '\n' || chaine.charAt(i)!=' ' || chaine.charAt(i)=='-' || (chaine.charAt(i)<'0' && chaine.charAt(i)>'9')){
+
+            }else{
+                return false;
+            }
+        }
+        return true;
+
+    }
+    //fonction qui remplit une matrice zero
+    private int [][] remplirMatriceDeZero(int sommet){
+        int matrice[][]=new int[sommet][sommet];
+        for (int i = 0; i < sommet; i++) {
+            for (int j = 0; j < sommet; j++) {
+                matrice[i][j]=0;
+            }
+        }
+        return matrice;
+    }
+
+}
